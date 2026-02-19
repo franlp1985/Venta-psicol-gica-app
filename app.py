@@ -1,5 +1,4 @@
 import streamlit as st
-import random
 
 st.set_page_config(page_title="VentaPsicologica AI", page_icon="🧠")
 
@@ -13,47 +12,38 @@ clave = st.sidebar.text_input("Introducí tu Clave Premium", type="password")
 if clave == "pincha2026":
     st.success("¡Acceso Total, Fran!")
     
-    # Usamos "key" para que Streamlit sepa que los campos deben resetearse
-    producto = st.text_input("¿Qué estás vendiendo?", placeholder="Ej: Zapatillas, un auto, asesoría...", key="prod")
-    chat_cliente = st.text_area("Pegá acá el chat del cliente:", height=150, key="chat")
+    producto = st.text_input("¿Qué estás vendiendo?", placeholder="Ej: Un auto, una asesoría...")
+    chat_cliente = st.text_area("Pegá acá el chat del cliente:", height=150)
 
-    if st.button("🚀 ANALIZAR ESTRATEGIA"):
+    if st.button("🚀 GENERAR ESTRATEGIA ÚNICA"):
         if not chat_cliente or not producto:
-            st.warning("Completá los dos campos para que pueda ayudarte, che.")
+            st.warning("Che, no te olvides de completar los campos.")
         else:
+            st.subheader("🎯 Respuesta Sugerida:")
+            
+            # --- Lógica de VentaPsicologica ---
             texto = chat_cliente.lower()
-            st.subheader("🎯 Análisis y Respuesta:")
             
-            # --- Respuestas Dinámicas para que no sea siempre lo mismo ---
-            res_caro = [
-                f"Entiendo que el precio asuste, pero pensá en el beneficio de tener tu {producto} ahora mismo. ¿Es un gasto o una inversión para vos?",
-                f"Si lo comparás con no tener el {producto}, ¿qué te sale más caro? Te puedo ofrecer una facilidad de pago si te sirve.",
-                f"El valor de este {producto} no está en el precio, sino en la solución que te da. ¿Querés que te explique por qué vale cada peso?"
-            ]
+            # Análisis de objeciones comunes con respuestas más variadas
+            if any(x in texto for x in ["caro", "plata", "dinero", "precio"]):
+                st.info("💡 **Técnica:** Reencuadre de Inversión")
+                respuesta = f"Entiendo que el precio sea un punto a evaluar. Pero pensá en el costo de oportunidad de no tener tu {producto} hoy. ¿Te sirve si lo financiamos o buscamos una alternativa?"
             
-            res_pensar = [
-                f"Dale, pensalo tranquilo. Pero te aviso que este {producto} vuela y no quiero que te quedes sin el tuyo por dudar. ¿Te reservo uno?",
-                f"Claro, consultalo con la almohada. Solo recordá que la oferta actual por el {producto} termina pronto. ¿Hay algo que te genere duda?",
-                f"Te entiendo. La mayoría de mis clientes que hoy disfrutan su {producto} al principio también lo pensaron. ¿Qué te falta para decidirte?"
-            ]
-
-            # Lógica mejorada
-            if any(x in texto for x in ["caro", "plata", "dinero", "precio", "presupuesto"]):
-                st.info("💡 **Diagnóstico:** Objeción de Precio")
-                st.write(f"**Estrategia:** {random.choice(res_caro)}")
-            
-            elif any(x in texto for x in ["pensar", "mañana", "después", "luego"]):
-                st.info("💡 **Diagnóstico:** Procrastinación")
-                st.write(f"**Estrategia:** {random.choice(res_pensar)}")
+            elif any(x in texto for x in ["pensar", "mañana", "luego", "después"]):
+                st.info("💡 **Técnica:** Gancho de Urgencia")
+                respuesta = f"Claro, tomate tu tiempo. Solo te aviso que tengo otros interesados en este {producto} y no te quiero fallar si se reserva. ¿Hay algo puntual que te haga dudar?"
+                
+            elif any(x in texto for x in ["otro", "competencia", "visto"]):
+                st.info("💡 **Técnica:** Diferenciación de Autoridad")
+                respuesta = f"Es lógico que compares. Pero lo que te llevás con este {producto} no lo vas a encontrar en otro lado por [mencionar tu ventaja]. ¿Querés que te cuente por qué mis clientes nos eligen?"
             
             else:
-                st.info("💡 **Diagnóstico:** Cierre de Alternativa")
-                st.write(f"**Estrategia:** '¡Buenísimo! ¿Preferís que coordinemos el envío de tu {producto} para hoy o te queda mejor mañana?'")
+                st.info("💡 **Técnica:** Cierre de Conclusión")
+                respuesta = f"¡Excelente! Veo que el {producto} es justo lo que buscás. Para avanzar, ¿te queda mejor que te mande los datos ahora o preferís que te llame en 5 minutos?"
 
-    # Botón de Limpiar mejorado (borra la memoria de la sesión)
-    if st.button("Limpiar Pantalla"):
-        for key in st.session_state.keys():
-            del st.session_state[key]
+            st.write(f"👉 **Copiá y pegá esto:** {respuesta}")
+
+    if st.button("🗑️ Limpiar y Nueva Consulta"):
         st.rerun()
 
 else:
