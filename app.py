@@ -11,50 +11,44 @@ st.sidebar.header("🔐 Acceso VIP")
 clave = st.sidebar.text_input("Introducí tu Clave", type="password")
 
 if clave == "pincha2026":
-    st.success("¡Bien ahí, Fran! Conectado.")
+    st.success("¡Conectado, Fran!")
     
-    producto = st.text_input("¿Qué estás ofreciendo?", placeholder="Ej: Un departamento, un seguro...")
-    chat_cliente = st.text_area("¿Qué excusa te puso el cliente?", height=120)
+    producto = st.text_input("¿Qué estás ofreciendo?", placeholder="Ej: Remeras, un auto...", key="prod")
+    chat_cliente = st.text_area("¿Qué te puso el cliente?", height=120, key="chat")
 
     if st.button("🚀 GENERAR RESPUESTA GANADORA"):
         if not chat_cliente or not producto:
-            st.warning("Che, no te olvides de poner qué vendés y qué te dijeron.")
+            st.warning("Completá los campos, che.")
         else:
             txt = chat_cliente.lower()
             st.subheader("🎯 Tu estrategia de cierre:")
 
-            # --- BANCO DE RESPUESTAS (Mucho más amplio para que no se repita) ---
-            opciones = {
-                "precio": [
-                    f"Entiendo que el precio sea un tema, pero pensá en el retorno: este {producto} se paga solo con los resultados que te va a dar. ¿Preferís ahorrar hoy o ganar mañana?",
-                    f"Si el dinero no fuera un problema, ¿el {producto} sería para vos? Te pregunto para entender si es un tema de valor o de presupuesto.",
-                    f"Este {producto} no es un gasto, es una inversión en tu tranquilidad/negocio. ¿Querés que veamos un plan de cuotas?"
-                ],
-                "tiempo": [
-                    f"Claro, tomate tu tiempo. Solo te aviso que la prioridad por este {producto} vuela y no quiero que te quedes sin el tuyo por dudar. ¿Te reservo el lugar?",
-                    f"El mejor momento para tener tu {producto} era ayer, el segundo mejor es hoy. ¿Qué es lo que te hace dudar para arrancar ya?",
-                    f"Te entiendo, pero recordá que el precio del {producto} puede subir si esperamos mucho. ¿Querés aprovechar la oferta de hoy?"
-                ],
-                "duda": [
-                    f"Totalmente de acuerdo. ¿Qué información te falta para que estés 100% convencido de que este {producto} es para vos?",
-                    f"¿Hay algo específico que no te cierre? Porque el {producto} está diseñado justamente para solucionar lo que me contabas.",
-                    f"Hagamos algo: probá el {producto} y si no es lo que esperabas, lo charlamos. ¿Te parece bien?"
-                ]
-            }
+            # --- Lógica de Detección Avanzada ---
+            
+            # 1. OBJECIÓN DE CALIDAD (Lo que te pasó recién)
+            if any(x in txt for x in ["mala", "calidad", "trucho", "feo", "malo", "rompe"]):
+                res = f"Te entiendo, hoy hay mucha porquería dando vueltas. Pero justamente con estas {producto} lo que buscamos es durabilidad. ¿Qué te hace dudar? Si querés te paso una foto del detalle de las costuras/material."
+            
+            # 2. OBJECIÓN DE PRECIO
+            elif any(x in txt for x in ["caro", "plata", "dinero", "precio", "costo"]):
+                res = random.choice([
+                    f"El precio es lo que pagás, el valor es lo que te llevás. Estas {producto} te van a durar el triple que una barata. ¿Preferís comprar una hoy o tres el mes que viene?",
+                    f"Entiendo, pero pensá que la calidad de este {producto} te ahorra dolores de cabeza. ¿Querés que veamos un descuento por cantidad?"
+                ])
+            
+            # 3. OBJECIÓN DE TIEMPO / VUELTERO
+            elif any(x in txt for x in ["pensar", "mañana", "luego", "después", "aviso"]):
+                res = f"Dale, no hay drama. Pero ojo que las {producto} están saliendo rápido y no sé si mañana voy a tener el mismo stock o precio. ¿Te reservo un par?"
 
-            # Lógica de selección más fina
-            if any(x in txt for x in ["caro", "plata", "dinero", "precio", "pagar", "costo"]):
-                res = random.choice(opciones["precio"])
-            elif any(x in txt for x in ["pensar", "mañana", "luego", "después", "tiempo", "semana"]):
-                res = random.choice(opciones["tiempo"])
+            # 4. RESPUESTA POR DEFECTO (Más natural)
             else:
-                res = random.choice(opciones["duda"])
+                res = f"Te entiendo perfectamente. Decime una cosa, ¿qué es lo que más te interesa de este {producto}? Así te confirmo si es lo que buscás o te recomiendo algo mejor."
 
             st.write(f"👉 **Copiá esto:** {res}")
-            st.balloons() # ¡Para festejar el cierre!
+            st.balloons()
 
-    if st.button("🗑️ Nueva Consulta (Limpiar)"):
+    if st.button("🗑️ Nueva Consulta"):
         st.rerun()
 
 else:
-    st.info("Poné la clave 'pincha2026' a la izquierda para activar la IA.")
+    st.info("Poné la clave 'pincha2026' a la izquierda.")
