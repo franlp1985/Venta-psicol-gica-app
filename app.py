@@ -1,76 +1,81 @@
 import streamlit as st
 import random
+import time
 
-# Configuración profesional
 st.set_page_config(page_title="VentaPsicologica AI", page_icon="🧠")
 
-st.markdown("<h1 style='text-align: center;'>🧠 VentaPsicologica AI</h1>", unsafe_allow_html=True)
-st.write("---")
-
-# --- MOTOR DE PSICOLOGÍA APLICADA ---
-def generar_estrategia(texto_cliente):
-    t = texto_cliente.lower()
-    
-    # 1. DETECCIÓN DE DESGASTE / USO (Ej: El auto tiene muchos KM)
-    if any(x in t for x in ["km", "kilometro", "uso", "viejo", "gastado", "antiguo", "años"]):
-        intros = ["Entiendo que el rodaje sea un punto que mires, ", "Es lógico que te fijes en el desgaste, ", "Comprendo tu duda sobre el uso previo, "]
-        cuerpos = [
-            "pero lo que realmente importa es cómo se mantuvo, no cuánto caminó.",
-            "sin embargo, este modelo está rindiendo por encima del promedio por el cuidado que tuvo.",
-            "pero recordá que un buen mantenimiento vale más que un número bajo en el tablero."
-        ]
-        cierres = ["¿Querés que lo revise tu mecánico?", "¿Te gustaría probarlo para sentir la potencia?", "¿Te paso el historial de servicios?"]
-    
-    # 2. DETECCIÓN DE PRECIO / VALOR
-    elif any(x in t for x in ["caro", "plata", "precio", "dinero", "presupuesto", "costo"]):
-        intros = ["Entiendo que el presupuesto sea clave, ", "Comprendo que el precio te haga dudar, ", "Es un monto que hay que evaluar bien, "]
-        cuerpos = [
-            "pero lo barato termina saliendo caro si no te da la seguridad que buscás.",
-            "sin embargo, la inversión se justifica con la durabilidad que te garantizo.",
-            "pero pensá en cuánto te vas a ahorrar mañana por comprar calidad hoy."
-        ]
-        cierres = ["¿Querés ver un plan de pagos?", "¿Te sirve si te hago una atención por hoy?", "¿Preferís tarjeta o transferencia?"]
-    
-    # 3. DETECCIÓN DE POSTERGACIÓN (Lo voy a pensar)
-    elif any(x in t for x in ["pensar", "mañana", "luego", "después", "aviso"]):
-        intros = ["Dale, consultalo tranquilo, ", "Entiendo que quieras procesarlo, ", "Claro, tomate tu tiempo, "]
-        cuerpos = [
-            "pero recordá que las oportunidades no se pierden, solo cambian de manos.",
-            "sin embargo, las dudas se sacan con la experiencia, no con el tiempo.",
-            "pero ojo que el stock se mueve rápido y no quiero que te quedes afuera."
-        ]
-        cierres = ["¿Qué te falta para estar 100% convencido?", "¿Te lo reservo por un par de horas?", "¿Querés que te saque la última duda ahora?"]
-    
-    # 4. RESPUESTA POR DEFECTO (Si no detecta categoría)
-    else:
-        return "Te entiendo perfectamente. Decime, ¿qué es lo que más te genera duda ahora? Así te doy una respuesta exacta para lo que necesitás."
-
-    # Retornamos la combinación única
-    return f"{random.choice(intros)}{random.choice(cuerpos)} {random.choice(cierres)}"
+# --- BANCO DE RESPUESTAS POR PROBLEMÁTICA REAL ---
+# Aquí separamos bien los tantos para que no se mezclen
+biblioteca = {
+    "calidad_producto": [
+        "Entiendo que dudes de la calidad, hoy hay mucha porquería dando vueltas. Pero la tela de estas prendas está probada para no deformarse. ¿Querés que te pase un video del detalle?",
+        "Es lógico que desconfíes si no tocás el material. Pero mi garantía es que esto dura el triple que lo barato. ¿Te sirve si te mando fotos de las costuras?",
+        "Comprendo tu punto. Lo que no se ve a simple vista es el refuerzo que tiene el material. ¿Qué es lo que más te hace dudar de la calidad?"
+    ],
+    "desgaste_tecnico": [
+        "Entiendo que los kilómetros te hagan ruido, pero lo que importa es el mantenimiento real. ¿Querés que lo vea tu mecánico de confianza?",
+        "Es lógico fijarse en el uso, pero este motor rinde el doble por el cuidado que tuvo. ¿Te gustaría probarlo y sentir cómo responde?",
+        "Comprendo la duda, pero un buen mantenimiento vale más que un número bajo en el tablero. ¿Te paso el historial de servicios completo?"
+    ],
+    "precio": [
+        "Entiendo que el precio sea un punto a evaluar, pero lo barato sale caro si no soluciona el problema. ¿Vemos un plan de pagos?",
+        "El valor se recuerda mucho después de que el precio se olvida. ¿Te sirve si te hago una atención especial por hoy?",
+        "Si el dinero no fuera el problema... ¿lo llevarías ahora mismo? Te pregunto para ver cómo ayudarte con el pago."
+    ],
+    "postergacion": [
+        "Dale, consultalo tranquilo, pero recordá que las oportunidades no se pierden, solo cambian de manos. ¿Te lo reservo por 2 horas?",
+        "Entiendo que quieras procesarlo, pero las dudas se sacan con la experiencia, no con el tiempo. ¿Qué te falta para decidirte?",
+        "Claro, tomate tu tiempo, pero ojo que el stock vuela y no quiero que te quedes afuera. ¿Querés sacarte la última duda ahora?"
+    ]
+}
 
 # --- INTERFAZ ---
+st.markdown("<h1 style='text-align: center;'>🧠 VentaPsicologica AI</h1>", unsafe_allow_html=True)
+
 st.sidebar.header("🔐 Acceso")
 clave = st.sidebar.text_input("Clave", type="password")
 
 if clave == "pincha2026":
-    st.success("¡Motor Psicológico Activo!")
-    
-    # El secreto está en este 'key'. Si cambia el texto, Streamlit sabe que debe refrescar.
-    chat = st.text_area("¿Qué excusa te puso el cliente?", height=150, placeholder="Ej: Es muy caro / Tiene muchos km...")
+    # El secreto para que no se cuelgue es que el texto se limpie internamente
+    chat = st.text_area("¿Qué te dijo el cliente?", height=150, key="input_usuario")
 
-    # Usamos un contenedor para que la respuesta se limpie al cambiar el texto
-    placeholder = st.empty()
-
-    if st.button("🚀 GENERAR RESPUESTA MAESTRA"):
+    # Botón con "disparador" para que no se guarde en memoria
+    if st.button("🚀 GENERAR RESPUESTA", key=f"btn_{time.time()}"):
         if not chat:
-            st.warning("Che, pegá primero lo que te puso el cliente.")
+            st.warning("Che, Fran, pegá el mensaje primero.")
         else:
-            with st.spinner("Analizando psicología del cliente..."):
-                resultado = generar_estrategia(chat)
-                placeholder.info(resultado)
-                st.balloons()
-else:
-    st.info("Poné tu clave 'pincha2026'.")
+            t = chat.lower()
+            
+            # --- LÓGICA DE DETECCIÓN ESTRICTA ---
+            # 1. Detectar Calidad (Remeras, tela, etc.)
+            if any(x in t for x in ["calidad", "mala", "tela", "trucho", "material", "rompe", "prenda"]):
+                categoria = "calidad_producto"
+            
+            # 2. Detectar Desgaste (Autos, KM, etc.)
+            elif any(x in t for x in ["km", "kilómetro", "kilometro", "motor", "uso", "años", "rodado"]):
+                categoria = "desgaste_tecnico"
+            
+            # 3. Detectar Precio
+            elif any(x in t for x in ["caro", "precio", "plata", "dinero", "presupuesto", "carisimo"]):
+                categoria = "precio"
+            
+            # 4. Detectar Postergación
+            elif any(x in t for x in ["pensar", "mañana", "luego", "después", "aviso"]):
+                categoria = "postergacion"
+            
+            # 5. General
+            else:
+                categoria = "postergacion" # Por defecto usamos cierre de duda
 
-if st.button("🗑️ Limpiar Todo"):
+            # Seleccionamos la respuesta de la bolsa correcta
+            respuesta = random.choice(biblioteca[categoria])
+            
+            st.write("---")
+            st.subheader("🎯 Estrategia Sugerida:")
+            st.info(respuesta)
+            st.balloons()
+else:
+    st.info("Poné la clave 'pincha2026'.")
+
+if st.button("🗑️ Resetear Cerebro"):
     st.rerun()
